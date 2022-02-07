@@ -1,0 +1,114 @@
+// SkynetHK-Aerial.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+using namespace std;
+
+int map[8][8];
+int turn = 0;
+int generateEnemy() {//Returns enemies position and generates map
+    int currentNum = 1;
+
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+            map[y][x] = currentNum;
+            currentNum++;
+
+        }
+    }
+
+    return (rand() % 64);
+}
+//the function does a binary search for enemy location by going through the rows and finding if it is less or higher than the current row and looks there
+void binarySearch(int mat[][8], int i, int yLow,
+    int yHigh, int x)
+{
+    while (yLow <= yHigh)
+    {
+        int xMid = (yLow + yHigh) / 2;
+        turn++;
+        //Located the enemy
+        if (mat[i][xMid] == x)
+        {
+            cout << "Enemy found at (" << i + 1 << ", " << xMid + 1 << ") on turn " << turn;
+            return;
+        }
+        else if (mat[i][xMid] > x)
+            yHigh = xMid - 1;
+        else
+            yLow = xMid + 1;
+    }
+}
+
+// Function to perform binary search on the mid
+// values of row to get the desired pair of rows
+// where the element can be found
+void sortedMatrixSearch(int mat[][8], int n,int m, int enemyLoc)
+{
+    //turns matrix into single array from rows
+    if (n == 1)
+    {
+        binarySearch(mat, 0, 0, m - 1, enemyLoc);
+        return;
+    }
+
+    int yLow = 0;
+    int yHigh = n - 1;//gets the arrays highest value from how many there are
+    int xMid = m / 2;
+
+    while ((yLow + 1) < yHigh)
+    {
+        int yMid = (yLow + yHigh) / 2;//Gets the y's mid point
+        turn++;
+        if (mat[yMid][xMid] == enemyLoc)// finds the enemy at the mid point
+        {
+            cout << "Enemy was found at (" << yMid + 1 << ", " << xMid + 1 << ") at turn " << turn;
+            return;
+        }
+
+        else if (mat[yMid][xMid] > enemyLoc)
+            yHigh = yMid;
+
+        else
+            yLow = yMid;
+    }
+
+    // If enemy is present in the middle of both rows
+    turn++;
+    if (mat[yLow][xMid] == enemyLoc) 
+        cout << "Enemy was found at (" << yLow+1 << "," << xMid + 1 << ") at turn " << turn;
+    turn++;
+    if (mat[yLow + 1][xMid] == enemyLoc) 
+        cout << "Enemy was found at (" << (yLow + 2) << ", " << xMid + 1 << ") at turn " << turn;
+    //searchs for enemy on first half of fisrt row
+    turn++;
+    if (enemyLoc <= mat[yLow][xMid - 1]) 
+        binarySearch(mat, yLow, 0, xMid - 1, enemyLoc);
+    //searchs for enemy on second half of the second row
+    turn++;
+    if (enemyLoc >= mat[yLow][xMid + 1] && enemyLoc <= mat[yLow][m - 1])
+        binarySearch(mat, yLow, xMid + 1, m - 1, enemyLoc);
+
+    //searchs for enemy on first half of thrid row
+    turn++;
+    if (enemyLoc <= mat[yLow + 1][xMid - 1]) 
+        binarySearch(mat, yLow + 1, 0, xMid - 1, enemyLoc);
+    //searchs for enemy on second half of second row
+    
+     binarySearch(mat, yLow + 1, xMid + 1, m - 1, enemyLoc);
+}
+
+// Driver program to test above
+int main()
+{
+    srand(time(NULL));
+    int enemyValue = generateEnemy();//Where the enemy is
+    int n = 8, m = 8;
+
+    cout << "Enemy is at " << enemyValue << endl;
+
+    sortedMatrixSearch(map, n, m, enemyValue);
+    return 0;
+}
